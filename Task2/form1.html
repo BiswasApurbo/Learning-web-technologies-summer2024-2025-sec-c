@@ -1,0 +1,32 @@
+<html>
+<head>
+    <title>Name Validation</title>
+</head>
+<body>
+    <h1>Name Form</h1>
+    <form method="post" action="abc.html" onsubmit="return validateName()">
+        <fieldset>
+            <label>Name:</label>
+            <input type="text" id="name">
+            <input type="submit" value="Submit">
+            <p id="error" style="color:red;"></p>
+        </fieldset>
+    </form>
+
+    <script>
+        function validateName() {
+            let name = document.getElementById("name").value;
+            if (name === "") {
+                document.getElementById("error").innerHTML = "Name cannot be empty.";
+                return false;
+            }
+            if (name.split(" ").length < 2) {
+                document.getElementById("error").innerHTML = "Name must contain at least two words.";
+                return false;
+            }
+
+            return true;
+        }
+    </script>
+</body>
+</html>

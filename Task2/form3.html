@@ -1,0 +1,30 @@
+<html>
+<head>
+    <title>Gender Selection</title>
+</head>
+<body>
+    <h1>Gender Form</h1>
+    <form method="post" action="abc.html" onsubmit="return validateGender()">
+        <fieldset>
+            <legend>Gender</legend>
+            <input type="radio" id="male" name="gen">
+            <label for="male">Male</label>
+            <input type="radio" id="female" name="gen">
+            <label for="female">Female</label>
+            <input type="radio" id="other" name="gen">
+            <label for="other">Other</label>
+        </fieldset>
+        <input type="submit" value="Submit">
+    </form>
+
+    <script>
+        function validateGender() {
+            if (!document.querySelector('input[name="gen"]:checked')) {
+                alert("Please select a gender.");
+                return false;
+            }
+            return true;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<html>
+<head>
+    <title>Email Validation</title>
+</head>
+<body>
+    <h1>Email Form</h1>
+    <form method="post" action="abc.html" onsubmit="return checkEmail()">
+        <fieldset>
+        <label>Email:</label>
+        <input type="text" id="email" placeholder="e.g. example@example.com">
+        <input type="submit" value="Submit">
+        </fieldset>
+    </form>
+
+    <script>
+        function validateEmail(email) {
+            var allowed = /^([a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$)/;
+            return allowed.test(email);
+        }
+
+        function checkEmail() {
+            let email = document.getElementById("email").value;
+            if (email === "") {
+                alert("Email cannot be empty.");
+                return false;
+            }
+            if (!validateEmail(email)) {
+                alert("Please enter a valid email address.");
+                return false;
+            }
+            return true;
+        }
+    </script>
+</body>
+</html>

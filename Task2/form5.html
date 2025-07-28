@@ -1,0 +1,30 @@
+<html>
+<head>
+    <title>Degree Selection</title>
+</head>
+<body>
+    <h1>Degree Form</h1>
+    <form method="post" action="abc.html" onsubmit="return validateDegree()">
+        <fieldset>
+            <legend>Degree</legend>
+            <input type="radio" id="ssc" name="degree">
+            <label for="ssc">SSC</label>
+            <input type="radio" id="hsc" name="degree">
+            <label for="hsc">HSC</label>
+            <input type="radio" id="bsc" name="degree">
+            <label for="bsc">BSC</label>
+        </fieldset>
+        <input type="submit" value="Submit">
+    </form>
+
+    <script>
+        function validateDegree() {
+            if (!document.querySelector('input[name="degree"]:checked')) {
+                alert("Please select a degree.");
+                return false;
+            }
+            return true;
+        }
+    </script>
+</body>
+</html>
