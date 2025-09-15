@@ -40,7 +40,7 @@ if (strtolower($_SESSION['role']) !== 'admin') {
 </head>
 <body>
 
-<h1>Admin Dashboard</h1>
+<h1>Welcome Admin</h1>
 <form class="dashboard-form">
     <fieldset>
         <legend>Quick Actions</legend>

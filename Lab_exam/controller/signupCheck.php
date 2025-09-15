@@ -13,35 +13,27 @@ if (!$user) {
 $username = trim($user->username ?? '');
 $password = trim($user->password ?? '');
 $email    = trim($user->email ?? '');
+$role     = trim($user->role ?? 'User');
 
-if ($username === "" || $password === "" || $email === "") {
+if ($username === "" || $password === "" || $email === "" || $role === "") {
     echo json_encode(['status' => 'error', 'message' => 'Please fill the form correctly.']);
     exit;
 }
-
 $users = getAlluser();
-$exists = false;
-
 foreach ($users as $u) {
     if (isset($u['email']) && $u['email'] === $email) {
-        $exists = true;
-        break;
+        echo json_encode(['status' => 'error', 'message' => 'This email is already registered.']);
+        exit;
     }
 }
-
-if ($exists) {
-    echo json_encode(['status' => 'error', 'message' => 'This email is already registered.']);
-    exit;
-}
-
-$user = [
+$newUser = [
     'username' => $username,
     'password' => $password,
     'email'    => $email,
-    'role'     => 'User'
+    'role'     => $role
 ];
 
-$status = addUser($user);
+$status = addUser($newUser);
 
 if ($status) {
     echo json_encode(['status' => 'success', 'message' => 'Registration successful!']);

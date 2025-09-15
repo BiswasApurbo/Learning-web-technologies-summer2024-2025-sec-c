@@ -28,7 +28,6 @@ if (isset($_GET['error'])) {
     <style>
         .error-msg { color: red; font-weight: 600; margin: 4px 0; }
         .ok { color: green; font-weight: 700; margin-top: 10px; text-align: center; }
-        .center-under { text-align: center; font-weight: 700; margin: 6px 0 14px; color: green; }
         .notice { text-align:center; font-weight:700; color:green; margin-bottom:12px; }
     </style>
 </head>
@@ -53,14 +52,21 @@ if (isset($_GET['error'])) {
             <input type="password" id="signupPassword" name="password" onblur="checkSignupPassword()" />
             <p id="signupPError" class="error-msg"></p>
 
+            Confirm Password:
+            <input type="password" id="signupConfirm" name="confirm" onblur="checkSignupConfirm()" />
+            <p id="signupCError" class="error-msg"></p>
+
+            Role: 
+            <label><input type="radio" name="role" value="User" checked>User</label>
+            <label><input type="radio" name="role" value="Admin">Admin</label>
+            <p id="signupRoleError" class="error-msg"></p>
+
             <input type="button" value="Sign Up" onclick="signupUser()" />
             <p id="signupSuccess" class="ok"></p>
         </fieldset>
 
         <p style="text-align:center;">
-            <input type="button" 
-                   value="Login" 
-                   onclick="window.location.href='login.php'">
+            <input type="button" value="Login" onclick="window.location.href='login.php'">
         </p>
     </form>
 
@@ -85,18 +91,30 @@ if (isset($_GET['error'])) {
                 password.length < 4 ? "Password must be at least 4 characters!" : "";
         }
 
+        function checkSignupConfirm() {
+            const password = document.getElementById('signupPassword').value;
+            const confirm = document.getElementById('signupConfirm').value;
+            document.getElementById('signupCError').innerHTML =
+                (password !== confirm) ? "Passwords do not match!" : "";
+        }
+
         function signupUser() {
             checkSignupUsername();
             checkSignupEmail();
             checkSignupPassword();
+            checkSignupConfirm();
             
             const username = document.getElementById('signupUsername').value.trim();
             const email = document.getElementById('signupEmail').value.trim();
             const password = document.getElementById('signupPassword').value;
-            
+            const confirm = document.getElementById('signupConfirm').value;
+            const role = document.querySelector('input[name="role"]:checked')?.value;
+
             const ok = document.getElementById('signupUError').innerHTML === "" &&
                        document.getElementById('signupEError').innerHTML === "" &&
-                       document.getElementById('signupPError').innerHTML === "";
+                       document.getElementById('signupPError').innerHTML === "" &&
+                       document.getElementById('signupCError').innerHTML === "";
+
             document.getElementById('signupSuccess').innerHTML = ok ? "Submitting…" : "";
 
             if (!ok) return false;
@@ -104,7 +122,8 @@ if (isset($_GET['error'])) {
             const user = {
                 'username': username,
                 'email': email,
-                'password': password
+                'password': password,
+                'role': role
             };
 
             const data = JSON.stringify(user);
