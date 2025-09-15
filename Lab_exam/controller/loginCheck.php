@@ -10,20 +10,20 @@ if (!$user) {
     exit;
 }
 
-$username = trim($user->username ?? '');
+$userid   = trim($user->userid ?? '');
 $password = trim($user->password ?? '');
 $remember = isset($user->remember) && $user->remember === '1';
 
-if ($username === "" || $password === "") {
-    echo json_encode(['status' => 'error', 'message' => 'Please enter both username and password.']);
+if ($userid === "" || $password === "") {
+    echo json_encode(['status' => 'error', 'message' => 'Please enter both User ID and password.']);
     exit;
 }
 
-$userData = ['username' => $username, 'password' => $password];
+$userData = ['userid' => $userid, 'password' => $password];
 $status = login($userData);
 
 if (!$status) {
-    echo json_encode(['status' => 'error', 'message' => 'Username/Password is not valid']);
+    echo json_encode(['status' => 'error', 'message' => 'UserID/Password is not valid']);
     exit;
 }
 
@@ -33,9 +33,10 @@ if (!$con) {
     exit;
 }
 
-$u_safe = mysqli_real_escape_string($con, $username);
+$u_safe = mysqli_real_escape_string($con, $userid);
 $p_safe = mysqli_real_escape_string($con, $password);
-$sql = "SELECT * FROM users WHERE username='{$u_safe}' AND password='{$p_safe}' LIMIT 1";
+
+$sql = "SELECT * FROM users WHERE userid='{$u_safe}' AND password='{$p_safe}' LIMIT 1";
 $result = mysqli_query($con, $sql);
 
 if (!$result) {
@@ -45,28 +46,25 @@ if (!$result) {
 
 $row = mysqli_fetch_assoc($result);
 if (!$row) {
-    echo json_encode(['status' => 'error', 'message' => 'Username/Password is not valid']);
+    echo json_encode(['status' => 'error', 'message' => 'UserID/Password is not valid']);
     exit;
 }
 
 $role = strtolower(trim((string)($row['role'] ?? '')));
 
-if ($role === 'admin') {
-    $_SESSION['role'] = 'admin';
-} else {
-    $_SESSION['role'] = 'user';
-}
+$_SESSION['role'] = ($role === 'admin') ? 'admin' : 'user';
 
 session_regenerate_id(true);
 $_SESSION['status']   = true;
-$_SESSION['username'] = $row['username'];
+$_SESSION['userid']   = $row['userid'];  
+$_SESSION['username'] = $row['username']; 
 $_SESSION['user_id']  = (int)($row['id'] ?? 0);
 $_SESSION['role']     = $role;
 
 if ($remember) {
     $exp = time() + 86400 * 30;
     setcookie('status', '1', $exp, '/');
-    setcookie('remember_user', $_SESSION['username'], $exp, '/');
+    setcookie('remember_user', $_SESSION['userid'], $exp, '/');
     setcookie('remember_role', $_SESSION['role'], $exp, '/');
 }
 

@@ -1,11 +1,12 @@
 <?php
 session_start();
 require_once('../model/userModel.php');
+
 if (!isset($_SESSION['status']) || $_SESSION['status'] !== true) {
     if (isset($_COOKIE['status']) && (string)$_COOKIE['status'] === '1') {
         $_SESSION['status'] = true;
-        if (!isset($_SESSION['username']) && isset($_COOKIE['remember_user'])) {
-            $_SESSION['username'] = $_COOKIE['remember_user'];
+        if (!isset($_SESSION['userid']) && isset($_COOKIE['remember_user'])) {
+            $_SESSION['userid'] = $_COOKIE['remember_user'];
         }
         if (!isset($_SESSION['role']) && isset($_COOKIE['remember_role'])) {
             $c = strtolower(trim((string)$_COOKIE['remember_role']));
@@ -16,11 +17,13 @@ if (!isset($_SESSION['status']) || $_SESSION['status'] !== true) {
         exit;
     }
 }
+
 $id = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 0;
-if ($id === 0 && isset($_SESSION['username'])) {
-    $tmp = getUserByUsername($_SESSION['username']);
+if ($id === 0 && isset($_SESSION['userid'])) {
+    $tmp = getUserByUserId($_SESSION['userid']); // ✅ use userid lookup
     $id = isset($tmp['id']) ? (int)$tmp['id'] : 0;
 }
+
 $user = [];
 if ($id > 0) {
     $user = getUserById($id);
@@ -28,9 +31,10 @@ if ($id > 0) {
 
 function h($s){ return htmlspecialchars($s ?? '', ENT_QUOTES, 'UTF-8'); }
 
-$name  = $user['username'] ?? ($_SESSION['username'] ?? 'User');
-$email = $user['email'] ?? '—';
-$type  = $_SESSION['role'] ?? 'User';
+$name   = $user['username'] ?? ($_SESSION['username'] ?? 'User');
+$userid = $user['userid'] ?? ($_SESSION['userid'] ?? '—');  // ✅ show userid
+$type   = $_SESSION['role'] ?? 'User';
+
 $dashboardPage = (strtolower($type) === 'admin') ? 'admin_dashboard.php' : 'user_dashboard.php';
 ?>
 <!DOCTYPE html>
@@ -50,7 +54,7 @@ $dashboardPage = (strtolower($type) === 'admin') ? 'admin_dashboard.php' : 'user
     <h1 style="text-align:center;">My Profile</h1>
     <form class="profile-card">
         <div class="meta"><strong>Name:</strong> <?= h($name) ?></div>
-        <div class="meta"><strong>Email:</strong> <?= h($email) ?></div>
+        <div class="meta"><strong>User ID:</strong> <?= h($userid) ?></div> <!-- ✅ changed -->
         <div class="meta"><strong>User Type:</strong> <?= h($type) ?></div>
 
         <div class="profile-actions">

@@ -12,24 +12,26 @@ if (!$user) {
 
 $username = trim($user->username ?? '');
 $password = trim($user->password ?? '');
-$email    = trim($user->email ?? '');
+$userid   = trim($user->userid ?? '');
 $role     = trim($user->role ?? 'User');
 
-if ($username === "" || $password === "" || $email === "" || $role === "") {
+if ($username === "" || $password === "" || $userid === "" || $role === "") {
     echo json_encode(['status' => 'error', 'message' => 'Please fill the form correctly.']);
     exit;
 }
+
 $users = getAlluser();
 foreach ($users as $u) {
-    if (isset($u['email']) && $u['email'] === $email) {
-        echo json_encode(['status' => 'error', 'message' => 'This email is already registered.']);
+    if (isset($u['userid']) && $u['userid'] === $userid) {
+        echo json_encode(['status' => 'error', 'message' => 'This User ID is already registered.']);
         exit;
     }
 }
+
 $newUser = [
     'username' => $username,
     'password' => $password,
-    'email'    => $email,
+    'userid'   => $userid,
     'role'     => $role
 ];
 

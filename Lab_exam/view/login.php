@@ -4,12 +4,12 @@ $err1 = $err2 = "";
 if (isset($_GET['error'])) {
     $error = $_GET['error'];
     if ($error === "Invalid_user") {
-        $err1 = "Please type valid username/password!";
+        $err1 = "Please type valid userid/password!";
     } elseif ($error === "badrequest") {
         $err2 = "Please login first!";
     }
 }
-$username = "";
+$userid = "";
 $rememberChecked = false;
 ?>
 <!DOCTYPE html>
@@ -40,11 +40,11 @@ $rememberChecked = false;
         <p style="color:red; font-weight:bold;"><?= htmlspecialchars($err1) ?></p>
     <?php endif; ?>
 
-    Username:
-    <input type="text" id="loginUsername" name="username"
-           value="<?= htmlspecialchars($username) ?>"
-           onblur="checkLoginUsername()" />
-    <p id="loginUError" class="error-msg"></p>
+    User ID:
+    <input type="text" id="loginUserId" name="userid"
+           value="<?= htmlspecialchars($userid) ?>"
+           onblur="checkLoginUserId()" />
+    <p id="loginIdError" class="error-msg"></p>
 
     Password:
     <input type="password" id="loginPassword" name="password" onblur="checkLoginPassword()" />
@@ -63,10 +63,10 @@ $rememberChecked = false;
 </form>
 
 <script>
-function checkLoginUsername() {
-    const username = document.getElementById('loginUsername').value.trim();
-    document.getElementById('loginUError').innerHTML =
-        username === "" ? "Please type username!" : "";
+function checkLoginUserId() {
+    const userid = document.getElementById('loginUserId').value.trim();
+    document.getElementById('loginIdError').innerHTML =
+        userid === "" ? "Please type user ID!" : "";
 }
 
 function checkLoginPassword() {
@@ -76,14 +76,15 @@ function checkLoginPassword() {
 }
 
 function loginUser() {
-    checkLoginUsername();
+    checkLoginUserId();
     checkLoginPassword();
 
-    const username = document.getElementById('loginUsername').value.trim();
+    const userid = document.getElementById('loginUserId').value.trim();
     const password = document.getElementById('loginPassword').value;
     const remember = document.querySelector('input[name="remember"]:checked') ? '1' : '0';
+
     const user = {
-        'username': username,
+        'userid': userid,
         'password': password,
         'remember': remember
     };

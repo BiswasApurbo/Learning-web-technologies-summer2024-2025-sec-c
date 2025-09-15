@@ -4,18 +4,12 @@ session_start();
 $errorMsg = '';
 if (isset($_GET['error'])) {
     $err = $_GET['error'];
-    if ($err === 'email_exists') {
-        $errorMsg = 'This email is already registered.';
+    if ($err === 'userid_exists') {
+        $errorMsg = 'This User ID is already registered.';
     } elseif ($err === 'regerror') {
         $errorMsg = 'Registration failed. Try again.';
     } elseif ($err === 'badrequest') {
         $errorMsg = 'Please fill the form correctly.';
-    } elseif ($err === '404') {
-        header("Location: error404.php");
-        exit;
-    } elseif ($err === '500') {
-        header("Location: error500.php");
-        exit;
     }
 }
 ?>
@@ -23,7 +17,7 @@ if (isset($_GET['error'])) {
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>Car Rental System - Signup</title>
+    <title>Signup</title>
     <link rel="stylesheet" type="text/css" href="../asset/auth.css">
     <style>
         .error-msg { color: red; font-weight: 600; margin: 4px 0; }
@@ -44,9 +38,9 @@ if (isset($_GET['error'])) {
             <input type="text" id="signupUsername" name="username" onblur="checkSignupUsername()" />
             <p id="signupUError" class="error-msg"></p>
 
-            Email:
-            <input type="text" id="signupEmail" name="email" onblur="checkSignupEmail()" />
-            <p id="signupEError" class="error-msg"></p>
+            User ID:
+            <input type="text" id="signupUserId" name="userid" onblur="checkSignupUserId()" />
+            <p id="signupIdError" class="error-msg"></p>
 
             Password:
             <input type="password" id="signupPassword" name="password" onblur="checkSignupPassword()" />
@@ -79,10 +73,12 @@ if (isset($_GET['error'])) {
             document.getElementById('signupUError').innerHTML = msg;
         }
         
-        function checkSignupEmail() {
-            const email = document.getElementById('signupEmail').value.trim();
-            const valid = email !== "" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-            document.getElementById('signupEError').innerHTML = valid ? "" : "Please enter a valid email!";
+        function checkSignupUserId() {
+            const userid = document.getElementById('signupUserId').value.trim();
+            let msg = "";
+            if (userid === "") msg = "Please enter User ID!";
+            else if (userid.length < 3) msg = "User ID must be at least 3 characters!";
+            document.getElementById('signupIdError').innerHTML = msg;
         }
 
         function checkSignupPassword() {
@@ -100,18 +96,18 @@ if (isset($_GET['error'])) {
 
         function signupUser() {
             checkSignupUsername();
-            checkSignupEmail();
+            checkSignupUserId();
             checkSignupPassword();
             checkSignupConfirm();
             
             const username = document.getElementById('signupUsername').value.trim();
-            const email = document.getElementById('signupEmail').value.trim();
+            const userid = document.getElementById('signupUserId').value.trim();
             const password = document.getElementById('signupPassword').value;
             const confirm = document.getElementById('signupConfirm').value;
             const role = document.querySelector('input[name="role"]:checked')?.value;
 
             const ok = document.getElementById('signupUError').innerHTML === "" &&
-                       document.getElementById('signupEError').innerHTML === "" &&
+                       document.getElementById('signupIdError').innerHTML === "" &&
                        document.getElementById('signupPError').innerHTML === "" &&
                        document.getElementById('signupCError').innerHTML === "";
 
@@ -121,7 +117,7 @@ if (isset($_GET['error'])) {
 
             const user = {
                 'username': username,
-                'email': email,
+                'userid': userid,
                 'password': password,
                 'role': role
             };
