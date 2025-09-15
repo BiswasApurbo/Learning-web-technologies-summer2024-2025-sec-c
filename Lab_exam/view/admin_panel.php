@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once('../model/userModel.php');
+
 if (!isset($_SESSION['status']) || $_SESSION['status'] !== true) {
     header('location: ../view/login.php?error=badrequest');
     exit;
@@ -9,6 +10,7 @@ if (strtolower($_SESSION['role']) !== 'admin') {
     header('location: ../view/login.php?error=badrequest');
     exit;
 }
+
 $allUsers = getAlluser();
 $filteredUsers = [];
 foreach ($allUsers as $u) {
@@ -16,6 +18,7 @@ foreach ($allUsers as $u) {
         $filteredUsers[] = $u;
     }
 }
+
 function h($s){ return htmlspecialchars($s ?? '', ENT_QUOTES, 'UTF-8'); }
 ?>
 <!DOCTYPE html>
@@ -37,12 +40,12 @@ function h($s){ return htmlspecialchars($s ?? '', ENT_QUOTES, 'UTF-8'); }
     <div class="admin-card">
         <h1>Registered Users</h1>
         <table class="users" aria-describedby="users-list">
-            <caption id="users-list">All registered users </caption>
+            <caption id="users-list">All registered users</caption>
             <thead>
                 <tr>
-                    <th style="width:10%">User ID</th>
+                    <th style="width:10%">ID</th>
                     <th style="width:30%">Username</th>
-                    <th style="width:40%">Email</th>
+                    <th style="width:40%">User ID</th>
                     <th style="width:20%">Role</th>
                 </tr>
             </thead>
@@ -52,7 +55,7 @@ function h($s){ return htmlspecialchars($s ?? '', ENT_QUOTES, 'UTF-8'); }
                         <tr>
                             <td><?= h($user['id']) ?></td>
                             <td><?= h($user['username']) ?></td>
-                            <td><?= h($user['email']) ?></td>
+                            <td><?= h($user['userid']) ?></td>
                             <td><?= h($user['role']) ?></td>
                         </tr>
                     <?php endforeach; ?>
