@@ -3,23 +3,11 @@ session_start();
 require_once('../model/userModel.php');
 
 if (!isset($_SESSION['status']) || $_SESSION['status'] !== true) {
-    if (isset($_COOKIE['status']) && (string)$_COOKIE['status'] === '1') {
-        $_SESSION['status'] = true;
-        if (!isset($_SESSION['username']) && isset($_COOKIE['remember_user'])) {
-            $_SESSION['username'] = $_COOKIE['remember_user'];
-        }
-        if (!isset($_SESSION['role']) && isset($_COOKIE['remember_role'])) {
-            $c = strtolower(trim((string)$_COOKIE['remember_role']));
-            $_SESSION['role'] = ($c === 'admin') ? 'Admin' : 'User';
-        }
-    } else {
-        echo json_encode(['status' => 'error', 'message' => 'User not logged in.']);
-        exit;
-    }
+    header('location: ../view/login.php?error=badrequest');
+    exit;
 }
-
 if (strtolower($_SESSION['role']) !== 'user') {
-    echo json_encode(['status' => 'error', 'message' => 'Unauthorized access.']);
+    header('location: ../view/login.php?error=badrequest');
     exit;
 }
 
@@ -38,49 +26,9 @@ if ($user) {
     exit;
 }
 
-$errors = ['old' => '', 'new' => '', 'general' => ''];
+$errors = ['old' => '', 'new' => '', 'confirm' => '', 'general' => ''];
 $success = '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $oldPass = trim($_POST['old_password'] ?? '');
-    $newPass = trim($_POST['new_password'] ?? '');
-
-    if ($oldPass === '') {
-        $errors['old'] = 'Enter old password!';
-    } else {
-        if ($oldPass !== $currentPassword) {
-            $errors['old'] = 'Old password is incorrect!';
-        }
-    }
-
-    if ($newPass === '') {
-        $errors['new'] = 'Enter new password!';
-    } elseif (strlen($newPass) < 4) {
-        $errors['new'] = 'New password must be at least 4 characters!';
-    } elseif ($oldPass !== '' && $oldPass === $newPass) {
-        $errors['new'] = 'New password must be different from old password!';
-    }
-
-    if (empty($errors['old']) && empty($errors['new'])) {
-        if ($id > 0) {
-            $con = getConnection();
-            $safePass = mysqli_real_escape_string($con, $newPass);
-            $sql = "UPDATE users SET password='{$safePass}' WHERE id=" . (int)$id;
-            if (mysqli_query($con, $sql)) {
-                $success = 'Password updated successfully!';
-                $_SESSION['auth_password'] = $newPass;
-                echo json_encode(['status' => 'success', 'message' => $success]);
-            } else {
-                $errors['general'] = 'Unable to update password. Try again.';
-                echo json_encode(['status' => 'error', 'message' => $errors['general']]);
-            }
-        }
-    } else {
-        echo json_encode(['status' => 'error', 'message' => implode(' ', $errors)]);
-    }
-}
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -90,30 +38,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <style>
         .error-msg { color: red; font-weight: 600; }
         .center-success { text-align: center; font-weight: bold; color: green; margin: 8px 0 16px; }
+        .disabled-btn { background: #ccc; cursor: not-allowed; }
     </style>
 </head>
 <body>
     <h1>Update Password</h1>
 
-    <?php if (!empty($success)): ?>
-        <p class="center-success"><?= htmlspecialchars($success) ?></p>
-    <?php endif; ?>
-
-    <?php if (!empty($errors['general'])): ?>
-        <p class="error-msg" style="text-align:center;"><?= htmlspecialchars($errors['general']) ?></p>
-    <?php endif; ?>
-
     <form id="updatePasswordForm">
         <fieldset>
             Old Password:
             <input type="password" id="oldPass" name="old_password">
-            <p id="oldError" class="error-msg"><?= htmlspecialchars($errors['old']) ?></p>
+            <p id="oldError" class="error-msg"></p>
 
             New Password:
             <input type="password" id="newPass" name="new_password">
-            <p id="newError" class="error-msg"><?= htmlspecialchars($errors['new']) ?></p>
+            <p id="newError" class="error-msg"></p>
 
-            <input type="submit" value="Update Password">
+            Retype New Password:
+            <input type="password" id="confirmPass" name="confirm_password">
+            <p id="confirmError" class="error-msg"></p>
+
+            <input type="submit" id="updateBtn" value="Update Password" disabled class="disabled-btn">
             <p id="updateSuccess"></p>
 
             <input type="button" value="Back to Dashboard" onclick="window.location.href='user_dashboard.php'">
@@ -121,14 +66,72 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </form>
 
     <script>
+        const oldPassEl = document.getElementById('oldPass');
+        const newPassEl = document.getElementById('newPass');
+        const confirmPassEl = document.getElementById('confirmPass');
+        const updateBtn = document.getElementById('updateBtn');
+
+        function validateForm() {
+            const oldPass = oldPassEl.value.trim();
+            const newPass = newPassEl.value.trim();
+            const confirmPass = confirmPassEl.value.trim();
+
+            let valid = true;
+
+            if (oldPass === "") {
+                document.getElementById('oldError').innerHTML = "Enter old password!";
+                valid = false;
+            } else {
+                document.getElementById('oldError').innerHTML = "";
+            }
+
+            if (newPass === "") {
+                document.getElementById('newError').innerHTML = "Enter new password!";
+                valid = false;
+            } else if (newPass.length < 4) {
+                document.getElementById('newError').innerHTML = "At least 4 characters!";
+                valid = false;
+            } else if (oldPass !== "" && oldPass === newPass) {
+                document.getElementById('newError').innerHTML = "New password must differ from old password!";
+                valid = false;
+            } else {
+                document.getElementById('newError').innerHTML = "";
+            }
+
+            if (confirmPass === "") {
+                document.getElementById('confirmError').innerHTML = "Retype new password!";
+                valid = false;
+            } else if (newPass !== confirmPass) {
+                document.getElementById('confirmError').innerHTML = "Passwords do not match!";
+                valid = false;
+            } else {
+                document.getElementById('confirmError').innerHTML = "";
+            }
+            if (valid) {
+                updateBtn.disabled = false;
+                updateBtn.classList.remove("disabled-btn");
+            } else {
+                updateBtn.disabled = true;
+                updateBtn.classList.add("disabled-btn");
+            }
+        }
+
+        oldPassEl.addEventListener('input', validateForm);
+        newPassEl.addEventListener('input', validateForm);
+        confirmPassEl.addEventListener('input', validateForm);
+
         document.getElementById('updatePasswordForm').onsubmit = function(e) {
             e.preventDefault();
-            var oldPass = document.getElementById('oldPass').value.trim();
-            var newPass = document.getElementById('newPass').value.trim();
+            if (updateBtn.disabled) return; 
+
+            var oldPass = oldPassEl.value.trim();
+            var newPass = newPassEl.value.trim();
+            var confirmPass = confirmPassEl.value.trim();
 
             var formData = new FormData();
             formData.append('old_password', oldPass);
             formData.append('new_password', newPass);
+            formData.append('confirm_password', confirmPass);
 
             var xhr = new XMLHttpRequest();
             xhr.open('POST', '../controller/update_password_handler.php', true);
@@ -137,12 +140,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     const response = JSON.parse(xhr.responseText);
                     if (response.status === 'success') {
                         document.getElementById('updateSuccess').innerHTML = response.message;
-                        document.getElementById('updateSuccess').style.color = 'green';  // Green color for success
-                        document.getElementById('oldError').innerHTML = '';
-                        document.getElementById('newError').innerHTML = '';
+                        document.getElementById('updateSuccess').style.color = 'green';
                     } else {
-                        document.getElementById('oldError').innerHTML = response.message;
-                        document.getElementById('updateSuccess').innerHTML = '';
+                        document.getElementById('updateSuccess').innerHTML = response.message;
+                        document.getElementById('updateSuccess').style.color = 'red';
                     }
                 }
             };
